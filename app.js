@@ -1,38 +1,26 @@
-// requeres
+// requires
 var express = require('express');
-var mysql = require('mysql');
+var bodyParser = require('body-parser');
+var db = require('./conexionbd');
 
+//var mysql = require('mysql');
 
 
 // inicializar variables
 var app = express();
 
+// body parser
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
-
-// conexion a bd
-const OPCIONES_CNX = {
-    host: 'localhost',
-    user: 'adm_frases',
-    password: '123456',
-    database: 'frases'
-};
-
-let conexion = mysql.createConnection(OPCIONES_CNX);
-conexion.connect((err, res) => {
-    if (err) throw err;
-
-    console.log('Base de datos mysql, online');
-});
-
+// importar rutas
+var appRoutes = require('./rutas/app');
+var appFrase = require('./rutas/frase');
 
 // rutas
-app.get('/', (req, res, next) => {
-    res.status(200).json({
-        ok: true,
-        mensaje: 'Peticion realizada correctamente'
-    });
-});
-
+app.use('/frase', appFrase);
+app.use('/', appRoutes);
 
 
 // escuchar peticiones

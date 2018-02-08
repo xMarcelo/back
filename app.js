@@ -17,9 +17,13 @@ app.use(bodyParser.json());
 // importar rutas
 var appRoutes = require('./rutas/app');
 var appFrase = require('./rutas/frase');
+var appUsuario = require('./rutas/usuario');
+var appLogin = require('./rutas/login');
 
 // rutas
 app.use('/frase', appFrase);
+app.use('/usuario', appUsuario);
+app.use('/login', appLogin);
 app.use('/', appRoutes);
 
 

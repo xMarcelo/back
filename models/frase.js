@@ -14,6 +14,11 @@ var frase = {
     updateById: function(id, datos, callback) {
         var sql = "update frase set " + datos + " where id=" + id;
         return db.query(sql, callback);
+    },
+    findBy: function(columna, dato_buscar, callback) {
+        var sql = "select * from frase where " + columna + "=" + dato_buscar;
+
+        return db.query(sql, callback);
     }
 }
 

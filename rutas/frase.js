@@ -2,7 +2,7 @@ var express = require('express');
 var bcrypt = require('bcryptjs'); //passoword
 
 var app = express();
-var frase = require('../models/frase')
+var frase = require('../models/frase');
 
 
 // obtener todas las frases

@@ -19,11 +19,15 @@ var appRoutes = require('./rutas/app');
 var appFrase = require('./rutas/frase');
 var appUsuario = require('./rutas/usuario');
 var appLogin = require('./rutas/login');
+var appApiGen = require('./rutas/apigen');
+var appUpload = require('./rutas/upload');
 
 // rutas
 app.use('/frase', appFrase);
 app.use('/usuario', appUsuario);
 app.use('/login', appLogin);
+app.use('/apigen', appApiGen);
+app.use('/upload', appUpload);
 app.use('/', appRoutes);
 
 

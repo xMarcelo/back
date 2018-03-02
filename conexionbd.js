@@ -1,9 +1,9 @@
 var mysql = require('mysql');
-const OPCIONES_CNX = {
+var OPCIONES_CNX = {
     host: 'localhost',
-    user: 'adm_frases',
-    password: '123456',
-    database: 'frases'
+    user: 'adminpime',
+    password: 'AdminMipe123',
+    database: 'webmipe'
 };
 
 var conexion = mysql.createConnection(OPCIONES_CNX);

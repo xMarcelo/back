@@ -9,6 +9,14 @@ var db = require('./conexionbd');
 // inicializar variables
 var app = express();
 
+//CORS
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
+    next();
+});
+
 // body parser
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -21,6 +29,7 @@ var appUsuario = require('./rutas/usuario');
 var appLogin = require('./rutas/login');
 var appApiGen = require('./rutas/apigen');
 var appUpload = require('./rutas/upload');
+var appImagenes = require('./rutas/imagenes');
 
 // rutas
 app.use('/frase', appFrase);
@@ -28,6 +37,7 @@ app.use('/usuario', appUsuario);
 app.use('/login', appLogin);
 app.use('/apigen', appApiGen);
 app.use('/upload', appUpload);
+app.use('/img', appImagenes);
 app.use('/', appRoutes);
 
 

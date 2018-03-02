@@ -42,8 +42,9 @@ var apiGEN = {
     add: function(datos, callback) {
         evaluarCriteriosSql(datos);
         var sql = "Insert into " + tabla + " (" + columnas + ")values(" + datos_columna + ")";
-        return db.query(sql, (err, result) => {
-            if (err) throw err;
+        //return db.query(sql, callback);
+        return db.query(sql, function(err, result, fields) {
+            if (err) return callback(err);
             //devolvemos la última id insertada
             callback(null, result.insertId);
         });

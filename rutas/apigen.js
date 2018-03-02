@@ -1,11 +1,117 @@
 var express = require('express');
 var bcrypt = require('bcryptjs'); //passoword
+// var jwt = require('jsonwebtoken');
+// var SEED = require('../config/config').SEED;
 var mdVerificarToken = require('../middleware/autentificacion');
 
 var app = express();
 var apiGEN = require('../models/apigen');
 
 var datos_api_model = {};
+
+// login 
+// app.post('/loguear/:tabla', (req, res) => {
+//     var body = req.body;
+//     // var paramtro = body.email ? "email='" + body.email + "' and estado=0" : "usuario='" + body.usuario + "' and estado=0";
+//     // valida por correo o usuario        
+//     var parametro = "where email='" + body.email + "' and estado=0";
+
+//     datos_api_model = {
+//         tabla: req.params.tabla,
+//         condiciones_de_busqueda: parametro
+//     };
+
+//     apiGEN.findBy(datos_api_model, (err, data) => {
+//         if (err) {
+//             return res.status(500).json({
+//                 ok: false,
+//                 mensaje: 'ERROR AL LOGUEAR',
+//                 error: err
+//             });
+//         }
+//         if (data.length === 0) {
+//             return res.status(400).json({
+//                 ok: false,
+//                 mensaje: 'CREDENCIALES INCORRECTAS - EMAIL',
+//             });
+//         }
+
+//         if (!bcrypt.compareSync(body.password, data[0]['password'])) {
+//             return res.status(400).json({
+//                 ok: false,
+//                 mensaje: 'CREDENCIALES INCORRECTAS - PASSWORD',
+//             });
+//         }
+
+//         // crear token!
+//         if (data[0]['password']) { data[0]['password'] = ":)"; }
+//         var token = jwt.sign({ usuario: data }, SEED, { expiresIn: 14400 });
+
+//         res.status(200).json({
+//             ok: true,
+//             usuario: data,
+//             token: token,
+//             idusuario: data[0]['idusuario']
+//         });
+//     });
+// })
+
+// agregar usuario sin token
+app.post('/registrarusuario/:tabla', (req, res) => {
+    var body = req.body;
+    var columnas = Object.keys(body).toString();
+    var datos_columna = Object.keys(body).map(function(key) {
+        var res;
+        // si es password lo encrypta
+        res = key.toLowerCase() === 'password' ? "'" + bcrypt.hashSync(body[key], 10) + "'" : "'" + body[key] + "'";
+        return res;
+    }).toString();
+
+    // verificar email
+    var parametro = "where email='" + body.email + "' and estado=0";
+
+    datos_api_model = {
+        tabla: req.params.tabla,
+        columnas: columnas,
+        datos_columna: datos_columna,
+        condiciones_de_busqueda: parametro
+    };
+
+    apiGEN.findBy(datos_api_model, (err, data) => {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'ERROR AL DE CONEXION - BD',
+                error: err
+            });
+        }
+        // si existe correo
+        if (data.length > 0) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'Este correo electronico ya se encuentra registrado',
+            });
+        } else { // si no existe crea el usuario
+            apiGEN.add(datos_api_model, (err, data) => {
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'ERROR AL INSERTAR DATOS - ' + [datos_api_model.tabla],
+                        error: err
+                    });
+                }
+
+                if (body.password) { body.password = ":)"; }
+                body.id = data;
+                res.status(201).json({
+                    ok: true,
+                    data: body,
+                    usuariotoken: req.usuariotoken
+                });
+            });
+        }
+    });
+});
 
 // obtener todas las filas
 app.get('/:tabla', mdVerificarToken.verificarToken, (req, res, next) => {
@@ -133,7 +239,7 @@ app.post('/:tabla', mdVerificarToken.verificarToken, (req, res) => {
             data: body,
             usuariotoken: req.usuariotoken
         });
-    })
+    });
 });
 
 // buscar por cualquier parametro

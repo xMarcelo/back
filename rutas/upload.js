@@ -11,12 +11,12 @@ var apiGEN = require('../models/apigen');
 // subir archivo con opcion de actualizar registro relacionado si se especifica los headers: tabla, id, campoupdate
 // el id del url es el id global -- que puede ser idsede -- para evitar duplicados 
 
-app.put('/:id', (req, res, next) => {
+app.put('/', (req, res, next) => {
     var body = req.body;
     var tabla = body.tabla;
     var id = body.id === undefined ? 0 : body.id;
     var campoupdate = body.campoupdate;
-    var idglobal = req.params.id;
+    // var idglobal = req.params.id;
 
     var path = body.path;
     var datos_api_model = {};
@@ -26,6 +26,17 @@ app.put('/:id', (req, res, next) => {
             ok: false,
             mensaje: 'Debe especificar la ruta - headers[path]' + path
         });
+    } else {
+        // comprobamos si existe la carpeta a mover
+        try {
+            fs.statSync(path).isDirectory();
+        } catch (e) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'No se encontro carpeta destino: ' + path,
+                errors: e
+            });
+        }
     }
 
     if (!req.files) {
@@ -35,29 +46,24 @@ app.put('/:id', (req, res, next) => {
         });
     }
 
-    var archivo = req.files.file;
-    var extension = archivo.name.split('.');
-    extension = extension[extension.length - 1];
+    var fileList = req.files.file;
+    var archivo;
+    var pathmover;
+    var NombreArchivosBD = '';
+    if (fileList.length) {
+        for (archivo of fileList) {
 
-    // extensiones permitidas
-    var extensionesPermitidas = ['png', 'jpg', 'jpeg', 'doc', 'xls'];
-    if (extensionesPermitidas.indexOf(extension) < 0) {
-        return res.status(400).json({
-            ok: false,
-            mensaje: 'Extension no permitidas. Solo se aceptan: ' + extensionesPermitidas.join(', ')
-        });
-    }
+            NombreArchivosBD += archivo.name + ',';
+            pathmover = `${path}/${archivo.name}`;
 
-    // renombrar archivo
-    var nombreArchivo = `${idglobal}-${id}-${new Date().getMilliseconds()}.${extension}`;
-    var pathmover = `${path}/${nombreArchivo}`;
-
-    archivo.mv(pathmover, err => {
-        if (err) {
-            return res.status(500).json({
-                ok: false,
-                mensaje: 'Error al mover el archivo a:' + pathmover,
-                error: err
+            archivo.mv(pathmover, err => {
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error al mover archivo',
+                        errors: err
+                    });
+                }
             });
         }
 
@@ -66,13 +72,40 @@ app.put('/:id', (req, res, next) => {
             valid: id,
             campoupdate: campoupdate,
             path: path,
-            nombreArchivo: nombreArchivo,
-            datos_columna: campoupdate + "='" + nombreArchivo + "'"
-        }
+            nombreArchivo: NombreArchivosBD.slice(0, -1),
+            datos_columna: campoupdate + "='" + NombreArchivosBD + "'"
+        };
 
         //actualiza registro relacionado si se especifico headers        
-        updateRegistroRelacionado(datos_api_model, res)
-    });
+        updateRegistroRelacionado(datos_api_model, res);
+    } else {
+        archivo = fileList;
+        NombreArchivosBD += archivo.name + ',';
+        pathmover = `${path}/${archivo.name}`;
+
+        archivo.mv(pathmover, err => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error al mover archivo',
+                    errors: err
+                });
+            }
+
+            datos_api_model = {
+                tabla: tabla,
+                valid: id,
+                campoupdate: campoupdate,
+                path: path,
+                nombreArchivo: NombreArchivosBD.slice(0, -1),
+                datos_columna: campoupdate + "='" + NombreArchivosBD + "'"
+            };
+
+            //actualiza registro relacionado si se especifico headers        
+            updateRegistroRelacionado(datos_api_model, res);
+
+        });
+    }
 });
 
 
@@ -112,20 +145,24 @@ function updateRegistroRelacionado(datos_api_model, res) {
                     });
                 }
 
-                res.status(200).json({
+                return res.status(200).json({
                     ok: true,
                     mensaje: 'Archivo subido correctamente. Registro actualizado!',
                     nombre_archivo: datos_api_model.nombreArchivo
                 });
             });
         });
-    } else {
-        res.status(200).json({
-            ok: true,
-            mensaje: 'Archivo subido correctamente',
-            nombre_archivo: datos_api_model.nombreArchivo
-        });
     }
+
+    return res.status(200).json({
+        ok: true,
+        mensaje: 'Archivo subido correctamente',
+        nombre_archivo: datos_api_model.nombreArchivo
+    });
+
+
 }
+
+
 
 module.exports = app;

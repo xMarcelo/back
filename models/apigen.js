@@ -37,7 +37,8 @@ var apiGEN = {
     },
     getAll: function(datos, callback) {
         evaluarCriteriosSql(datos);
-        return db.query(paginar('select * from ' + tabla + ' ' + condiciones_de_busqueda), callback);
+        var sql = 'select * from ' + tabla + ' ' + condiciones_de_busqueda;
+        return db.query(paginar(sql), callback);
     },
     add: function(datos, callback) {
         evaluarCriteriosSql(datos);

@@ -244,6 +244,7 @@ app.get('/:tabla/:id', mdVerificarToken.verificarToken, (req, res) => {
         tabla: req.params.tabla,
         valid: req.params.id
     }
+
     apiGEN.findByID(datos_api_model, (err, data) => {
         if (err) {
             return res.status(500).json({

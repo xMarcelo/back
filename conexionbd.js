@@ -3,7 +3,8 @@ var OPCIONES_CNX = {
     host: 'localhost',
     user: 'adminpime',
     password: 'AdminMipe123',
-    database: 'webmipe'
+    database: 'webmipe',
+    multipleStatements: true, // acepta multimples consultas
 };
 
 var conexion = mysql.createConnection(OPCIONES_CNX);

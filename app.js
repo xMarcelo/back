@@ -31,6 +31,10 @@ var appApiGen = require('./rutas/apigen');
 var appUpload = require('./rutas/upload');
 var appImagenes = require('./rutas/imagenes');
 
+var appLogistica = require('./rutas/logistica');
+var appVentas = require('./rutas/ventas');
+var appMaestros = require('./rutas/maestros');
+
 // rutas
 app.use('/frase', appFrase);
 app.use('/usuario', appUsuario);
@@ -38,6 +42,10 @@ app.use('/login', appLogin);
 app.use('/apigen', appApiGen);
 app.use('/upload', appUpload);
 app.use('/img', appImagenes);
+
+app.use('/logistica', appLogistica);
+app.use('/ventas', appVentas);
+app.use('/maestros', appMaestros);
 app.use('/', appRoutes);
 
 
